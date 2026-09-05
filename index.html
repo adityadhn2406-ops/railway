@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Railway ID Card Generator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+            background-color: #eef1f5;
+            color: #111;
+        }
+
+        /* Official Portal Header */
+        .portal-header {
+            background: linear-gradient(135deg, #001a33 0%, #003366 100%);
+            color: #ffffff;
+            padding: 16px 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 4px solid #da251c;
+            margin-bottom: 25px;
+        }
+
+        .portal-branding {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .portal-logo {
+            width: 45px;
+            height: 45px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .portal-title h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .portal-title p {
+            font-size: 12px;
+            color: #b0c4de;
+            margin-top: 2px;
+        }
+
+        /* Control Panel */
+        .admin-dashboard {
+            max-width: 900px;
+            margin: 0 auto 25px auto;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .admin-dashboard h2 {
+            color: #002855;
+            font-size: 16px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 260px;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 13.5px;
+            background: #f8fafc;
+        }
+
+        input[type="text"]:focus {
+            border-color: #003366;
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+        }
+
+        button {
+            background: #002855;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #001a38;
+        }
+
+        .btn-print {
+            background: #28a745;
+        }
+
+        .btn-print:hover {
+            background: #1e7e34;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 11px;
+            color: #777;
+            font-weight: bold;
+        }
+
+        /* Output Grid */
+        #card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding-bottom: 40px;
+        }
+
+        .card-pair {
+            display: flex;
+            gap: 15px;
+            background: #d4d8de;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        /* Physical 8.5cm x 5.5cm Card Base with Fading Linear Gradient */
+        .id-card {
+            width: 8.5cm;
+            height: 5.5cm;
+            /* Yellow shade at edges, fading to lighter cream in the middle */
+            background: linear-gradient(to right, #DEC98B 0%, #FCF9EE 50%, #DEC98B 100%);
+            border: 1px solid #C5BC9D;
+            border-radius: 5px;
+            padding: 0.12cm 0.2cm;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* Centered Watermark with 20% Opacity */
+        .watermark-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 3.0cm;
+            opacity: 0.2;
+            filter: grayscale(100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Ensure text/content sits above watermark */
+        .front-header,
+        .front-body,
+        .front-footer,
+        .back-body {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Front Header Layout */
+        .front-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: none;
+            margin-bottom: 2px;
+        }
+
+        .emblem-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 0.85cm;
+        }
+
+        .logo-emblem {
+            width: 0.85cm;
+            height: 1.0cm;
+            object-fit: contain;
+        }
+
+        .satyameva {
+            font-size: 4px;
+            font-weight: bold;
+            color: #111;
+            margin-top: 1px;
+        }
+
+        .logo-railway {
+            width: 1.0cm;
+            height: 1.0cm;
+            object-fit: contain;
+        }
+
+        .header-titles {
+            text-align: center;
+            flex: 1;
+            padding: 0 2px;
+        }
+
+        .hi-top {
+            font-size: 11.5px;
+            font-weight: bold;
+            color: #000;
+            line-height: 1.15;
+            margin-bottom: 1px;
+        }
+
+        .en-top {
+            font-size: 9.5px;
+            font-weight: bold;
+            color: #000;
+            line-height: 1.15;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .hi-sub {
+            font-size: 9px;
+            font-weight: bold;
+            color: #111;
+            line-height: 1.15;
+        }
+
+        .en-sub {
+            font-size: 7px;
+            font-weight: bold;
+            color: #222;
+            line-height: 1.15;
+            text-transform: uppercase;
+        }
+
+        /* Front Body Alignment */
+        .front-body {
+            display: flex;
+            gap: 0.20cm;
+            flex-grow: 1;
+            margin-top: 2px;
+        }
+
+        .photo-column {
+            width: 1.75cm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-left: 0.1cm;
+        }
+
+        .photo-box {
+            width: 1.7cm;
+            height: 2.15cm;
+            border: 1px solid #333;
+            object-fit: cover;
+            background: #e5e5e5;
+            margin-bottom: 1px;
+        }
+
+        .holder-sign-label {
+            font-size: 4.8px;
+            color: #111;
+            margin-top: 1.5px;
+            text-align: center;
+            line-height: 1.1;
+            font-weight: 600;
+        }
+
+        .details-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            padding: 2px 0;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .detail-label {
+            width: 1.7cm;
+            font-weight: bold;
+            color: #000;
+            font-size: 7.5px;
+            line-height: 1.15;
+            flex-shrink: 0;
+        }
+
+        .detail-value {
+            flex: 1;
+            font-weight: bold;
+            color: #000;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            word-break: break-word;
+            line-height: 1.15;
+        }
+
+        .front-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: auto;
+        }
+
+        .authority-text {
+            text-align: center;
+            font-size: 6px;
+            font-weight: bold;
+            color: #111;
+            line-height: 1.1;
+        }
+
+        /* Back Body Alignment */
+        .back-body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .back-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            flex-grow: 1;
+            padding-bottom: 5px;
+        }
+
+        .back-label {
+            width: 2.4cm;
+            font-weight: bold;
+            color: #000;
+            font-size: 7.5px;
+            line-height: 1.15;
+            flex-shrink: 0;
+        }
+
+        .back-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: auto;
+        }
+
+        .disclaimer-text {
+            font-size: 5.5px;
+            color: #111;
+            line-height: 1.2;
+            font-weight: bold;
+        }
+
+        .qr-section {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .qr-code {
+            width: 1.15cm;
+            height: 1.15cm;
+            border: 1px solid #555;
+            background: #fff;
+            padding: 1px;
+        }
+
+        .serial-code {
+            font-size: 4.5px;
+            font-weight: bold;
+            color: #111;
+            white-space: nowrap;
+        }
+
+        /* PRINT MEDIA FOR HARD PVC CARDS */
+        @media print {
+            @page {
+                size: 8.5cm 5.5cm;
+                margin: 0;
+            }
+
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .portal-header,
+            .admin-dashboard {
+                display: none !important;
+            }
+
+            #card-container {
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .card-pair {
+                display: block !important;
+                background: transparent !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .id-card {
+                box-shadow: none !important;
+                margin: 0 !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="portal-header">
+        <div class="portal-branding">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Indian_Railway_Logo.svg" class="portal-logo"
+                alt="Indian Railways">
+            <div class="portal-title">
+                <h1>EAST CENTRAL RAILWAY - DHANBAD DIVISION</h1>
+                <p>Official ID Card Generation Portal</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-dashboard">
+        <h2>📥 Import Spreadsheet Data</h2>
+
+        <div class="input-group">
+            <input type="text" id="csv-url" placeholder="Paste Google Sheet Public CSV Link here...">
+            <button onclick="saveAndLoadData()">Fetch Data Online</button>
+        </div>
+
+        <div class="divider">OR UPLOAD LOCAL CSV FILE</div>
+
+        <div class="input-group">
+            <input type="file" id="csv-file" accept=".csv" onchange="handleFileUpload(event)">
+        </div>
+
+        <h2 style="margin-top: 20px;">🔍 Search & Batch Print</h2>
+        <div class="input-group">
+            <input type="text" id="search-bar" placeholder="Search generated cards by Name, PF No, HRMS ID, Mobile..."
+                onkeyup="filterCards()">
+            <button class="btn-print" onclick="window.print()">🖨️ Print to PVC Card</button>
+        </div>
+    </div>
+
+    <div id="card-container"></div>
+
+    <script>
+        window.onload = () => {
+            const savedUrl = localStorage.getItem('railwayCsvUrl');
+            if (savedUrl) {
+                document.getElementById('csv-url').value = savedUrl;
+                fetchAndGenerateCards(savedUrl);
+            }
+        };
+
+        function saveAndLoadData() {
+            const url = document.getElementById('csv-url').value.trim();
+            if (url) {
+                localStorage.setItem('railwayCsvUrl', url);
+                fetchAndGenerateCards(url);
+            } else {
+                alert("Please enter a valid Google Sheet link.");
+            }
+        }
+
+        async function fetchAndGenerateCards(rawUrl) {
+            let csvText = '';
+            let url = rawUrl;
+
+            const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            if (match && match[1] && !url.includes('export?format=csv') && !url.includes('/pub?')) {
+                url = `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv`;
+            }
+
+            try {
+                const res = await fetch(url);
+                if (res.ok) csvText = await res.text();
+            } catch (e) { }
+
+            if (!csvText || csvText.toLowerCase().includes('<!doctype html>')) {
+                try {
+                    const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`);
+                    if (res.ok) csvText = await res.text();
+                } catch (e) { }
+            }
+
+            if (csvText && csvText.includes(',') && !csvText.toLowerCase().includes('<!doctype html>')) {
+                const rows = parseCSV(csvText);
+                renderCards(rows);
+            } else {
+                alert("Could not load data online. Please download your Google Sheet as a .CSV file and upload it using the 'Choose File' button.");
+            }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const rows = parseCSV(e.target.result);
+                renderCards(rows);
+            };
+            reader.readAsText(file);
+        }
+
+        function getDriveImageSrc(url) {
+            if (!url) return 'https://via.placeholder.com/70x90?text=No+Photo';
+            const cleanUrl = url.trim();
+            const match = cleanUrl.match(/id=([a-zA-Z0-9_-]+)/) ||
+                cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) ||
+                cleanUrl.match(/file\/d\/([a-zA-Z0-9_-]+)/);
+
+            if (match && match[1]) {
+                return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            }
+            return cleanUrl;
+        }
+
+        function parseCSV(text) {
+            const rows = [];
+            let currentRow = [];
+            let currentCell = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (inQuotes) {
+                    if (char === '"') {
+                        if (text[i + 1] === '"') { currentCell += '"'; i++; }
+                        else { inQuotes = false; }
+                    } else { currentCell += char; }
+                } else {
+                    if (char === '"') { inQuotes = true; }
+                    else if (char === ',') { currentRow.push(currentCell.trim()); currentCell = ''; }
+                    else if (char === '\n' || char === '\r') {
+                        currentRow.push(currentCell.trim());
+                        if (currentRow.length > 1 || currentRow[0] !== '') rows.push(currentRow);
+                        currentRow = []; currentCell = '';
+                        if (char === '\r' && text[i + 1] === '\n') i++;
+                    } else { currentCell += char; }
+                }
+            }
+            if (currentCell !== '' || currentRow.length > 0) {
+                currentRow.push(currentCell.trim());
+                if (currentRow.length > 1 || currentRow[0] !== '') rows.push(currentRow);
+            }
+            return rows;
+        }
+
+        function mapColumns(headerRow) {
+            const map = {
+                email: -1, hrmsId: -1, station: -1, pfNo: -1,
+                name: -1, fatherName: -1, design: -1, dept: -1,
+                mobile: -1, bloodGroup: -1, height: -1, address: -1,
+                mark: -1, doa: -1, dob: -1, photoUrl: -1
+            };
+            if (!headerRow) return map;
+
+            headerRow.forEach((col, idx) => {
+                const h = col.toLowerCase();
+                if (h.includes('photo') || h.includes('upload') || h.includes('image') || h.includes('drive')) map.photoUrl = idx;
+                else if (h.includes('hrms')) map.hrmsId = idx;
+                else if (h.includes('station')) map.station = idx;
+                else if (h.includes('pf') || h.includes('emp') || h.includes('ic') || h.includes('number')) map.pfNo = idx;
+                else if (h.includes('father')) map.fatherName = idx;
+                else if (h.includes('name') && !h.includes('father')) map.name = idx;
+                else if (h.includes('designation') || h.includes('post')) map.design = idx;
+                else if (h.includes('department') || h.includes('dept')) map.dept = idx;
+                else if (h.includes('mobile') || h.includes('phone') || h.includes('contact')) map.mobile = idx;
+                else if (h.includes('blood')) map.bloodGroup = idx;
+                else if (h.includes('height')) map.height = idx;
+                else if (h.includes('address') || h.includes('residential')) map.address = idx;
+                else if (h.includes('mark') || h.includes('identification')) map.mark = idx;
+                else if (h.includes('doa') || h.includes('appointment')) map.doa = idx;
+                else if (h.includes('dob') || h.includes('birth')) map.dob = idx;
+                else if (h.includes('email')) map.email = idx;
+            });
+            return map;
+        }
+
+        function renderCards(allRows) {
+            const container = document.getElementById('card-container');
+            container.innerHTML = '';
+
+            if (!allRows || allRows.length === 0) return;
+
+            const firstRowStr = allRows[0].join(' ').toLowerCase();
+            const hasHeader = firstRowStr.includes('name') || firstRowStr.includes('timestamp') || firstRowStr.includes('dob') || firstRowStr.includes('hrms') || firstRowStr.includes('photo');
+
+            let map = { email: 1, hrmsId: 2, station: 3, pfNo: 4, name: 5, fatherName: 6, design: 7, dept: 8, mobile: 9, bloodGroup: 10, height: 11, address: 12, mark: 13, doa: 14, dob: 15, photoUrl: 16 };
+            let dataRows = allRows;
+
+            if (hasHeader) {
+                map = mapColumns(allRows[0]);
+                dataRows = allRows.slice(1);
+            }
+
+            const getVal = (row, idx, fallbackIdx) => {
+                const targetIdx = idx !== -1 ? idx : fallbackIdx;
+                return (row && targetIdx >= 0 && row[targetIdx]) ? row[targetIdx].trim() : '';
+            };
+
+            dataRows.forEach((member, index) => {
+                if (!member || member.length < 2) return;
+
+                const email = getVal(member, map.email, 1);
+                const hrmsId = getVal(member, map.hrmsId, 2);
+                const station = getVal(member, map.station, 3);
+                const pfNo = getVal(member, map.pfNo, 4);
+                const name = getVal(member, map.name, 5);
+                const fatherName = getVal(member, map.fatherName, 6);
+                const design = getVal(member, map.design, 7);
+                const dept = getVal(member, map.dept, 8);
+                const mobile = getVal(member, map.mobile, 9);
+                const bloodGroup = getVal(member, map.bloodGroup, 10);
+                const height = getVal(member, map.height, 11);
+                const address = getVal(member, map.address, 12);
+                const mark = getVal(member, map.mark, 13);
+                const doa = getVal(member, map.doa, 14);
+                const dob = getVal(member, map.dob, 15);
+                const rawPhoto = getVal(member, map.photoUrl, 16);
+
+                const photoUrl = getDriveImageSrc(rawPhoto);
+                const qrData = encodeURIComponent(`PF:${pfNo}|HRMS:${hrmsId}|NAME:${name}|STATION:${station}|MOB:${mobile}`);
+                const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=95x95&data=${qrData}`;
+                const serialCode = `DXZCSG 18104 ${String(index + 1).padStart(4, '0')}_DHN`;
+
+                const cardHTML = `
+                    <div class="card-pair" data-search="${name.toLowerCase()} ${pfNo.toLowerCase()} ${hrmsId.toLowerCase()} ${mobile.toLowerCase()}">
+                        
+                        <!-- FRONT SIDE -->
+                        <div class="id-card">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/b/be/Indian_Railways.png" class="watermark-logo" alt="" />
+                            
+                            <div class="front-header">
+                                <div class="emblem-container">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" class="logo-emblem" alt="Emblem" />
+                                    <div class="satyameva">सत्यमेव जयते</div>
+                                </div>
+                                <div class="header-titles">
+                                    <div class="hi-top">भारत सरकार</div>
+                                    <div class="en-top">GOVERNMENT OF INDIA</div>
+                                    <div class="hi-sub">पूर्व मध्य रेल, धनबाद मंडल</div>
+                                    <div class="en-sub">EAST CENTRAL RAILWAY, DHANBAD DIVISION</div>
+                                </div>
+                                <img src="https://upload.wikimedia.org/wikipedia/en/b/be/Indian_Railways.png" class="logo-railway" alt="Logo" />
+                            </div>
+
+                            <div class="front-body">
+                                <div class="photo-column">
+                                    <img src="${photoUrl}" class="photo-box" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://via.placeholder.com/70x90?text=Photo';" />
+                                    <div class="holder-sign-label">
+                                        कार्डधारक का हस्ताक्षर<br>Sign. of Card Holder
+                                    </div>
+                                </div>
+                                <div class="details-column">
+                                    <div class="detail-row"><span class="detail-label">प० पत्र सं०<br>I.C.No.</span><span class="detail-value">: ${pfNo}</span></div>
+                                    <div class="detail-row"><span class="detail-label">नाम<br>Name</span><span class="detail-value">: ${name}</span></div>
+                                    ${fatherName ? `<div class="detail-row"><span class="detail-label">पिता का नाम<br>Father's Name</span><span class="detail-value">: ${fatherName}</span></div>` : ''}
+                                    <div class="detail-row"><span class="detail-label">पदनाम<br>Design.</span><span class="detail-value">: ${design}</span></div>
+                                    <div class="detail-row"><span class="detail-label">विभाग<br>Dept.</span><span class="detail-value">: ${dept} ${station ? `(${station})` : ''}</span></div>
+                                    <div class="detail-row"><span class="detail-label">जन्म तिथि<br>D.O.B</span><span class="detail-value">: ${dob}</span></div>
+                                </div>
+                            </div>
+
+                            <div class="front-footer">
+                                <div class="authority-text">
+                                    Issuing Authority<br>APO/ECR/DHN
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BACK SIDE -->
+                        <div class="id-card">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/b/be/Indian_Railways.png" class="watermark-logo" alt="" />
+                            
+                            <div class="back-body">
+                                <div class="back-details">
+                                    <div class="detail-row"><span class="back-label">आवासीय पता<br>Residential Address</span><span class="detail-value">: ${address}</span></div>
+                                    <div class="detail-row"><span class="back-label">पहचान चिन्ह<br>Identification Mark</span><span class="detail-value">: ${mark}</span></div>
+                                    <div class="detail-row"><span class="back-label">दूरभाष संख्या<br>Mobile No.</span><span class="detail-value">: ${mobile}</span></div>
+                                    ${hrmsId ? `<div class="detail-row"><span class="back-label">HRMS ID</span><span class="detail-value">: ${hrmsId}</span></div>` : ''}
+                                    <div class="detail-row"><span class="back-label">ऊंचाई<br>Height</span><span class="detail-value">: ${height}</span></div>
+                                    <div class="detail-row"><span class="back-label">नियुक्ति की तारीख<br>DOA</span><span class="detail-value">: ${doa}</span></div>
+                                    <div class="detail-row"><span class="back-label">रक्त ग्रुप<br>Blood Group</span><span class="detail-value" style="color:#c00;">: ${bloodGroup}</span></div>
+                                </div>
+
+                                <div class="back-bottom">
+                                    <div class="disclaimer-text">
+                                        * Please keep it during duty hours.<br>
+                                        * If found, please drop it to the nearest post box.
+                                    </div>
+                                    <div class="qr-section">
+                                        <img src="${qrSrc}" class="qr-code" alt="QR" />
+                                        <div class="serial-code">${serialCode}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+        }
+
+        function filterCards() {
+            const query = document.getElementById('search-bar').value.toLowerCase();
+            const pairs = document.querySelectorAll('.card-pair');
+            pairs.forEach(pair => {
+                const searchData = pair.getAttribute('data-search');
+                pair.style.display = searchData.includes(query) ? 'flex' : 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>
